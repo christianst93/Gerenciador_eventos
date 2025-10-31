@@ -35,8 +35,7 @@ public class GerenciadorEventos {
                 in.nextLine();
 
                 switch (opcao) {
-                case 0: System.out.println("Conexão encerrada.");
-                        in.close();                
+                case 0: System.out.println("Conexão encerrada.");              
                         return;
                 case 1: String inserirUsuario = "INSERT INTO usuario (nome,email, senha) VALUES (?,?,?) RETURNING id_usuario";
                         int id_usuario;
@@ -50,8 +49,15 @@ public class GerenciadorEventos {
                             ResultSet rs = ps.executeQuery();
                             rs.next();
                             id_usuario = rs.getInt("id_usuario");
-                            System.out.println("Usuário cadastrado com ID: " + id_usuario + "\n");
-                        }                
+                            System.out.println("Usuário cadastrado com ID: " + id_usuario + "\n");                            
+                        } catch (SQLException e){
+                            if (e.getMessage().contains("duplicate key value")) {
+                                System.out.println("\nO email informado já está cadastrado no sistema, tente utilizar outro email.\n");
+                            } else {
+                                System.out.println("Ocorreu um erro ao cadastrar o usuário:");
+                                System.out.println(e.getMessage());
+                            }
+                        }               
                     break;
                 case 2: String inserirEvento = "INSERT INTO evento (titulo, descricao, data_evento, local, id_usuario, criado_em) VALUES (?,?,?,?,?,?) RETURNING id_evento";
                         int id_evento;
@@ -62,6 +68,16 @@ public class GerenciadorEventos {
                             ps.setString(2, in.nextLine());
                             System.out.println("Digite a data do evento:");
                             String data = in.nextLine();
+                            
+                            java.sql.Date dataEvento;
+                            try {
+                                dataEvento = java.sql.Date.valueOf(data);
+                            } catch (IllegalArgumentException ex) {
+                                System.out.println("\nA data informada está em formato inválido.");
+                                System.out.println("Use o formato correto: (yyyy-mm-dd)\n");
+                                break;                            
+                            }
+
                             ps.setDate(3, java.sql.Date.valueOf(data));
                             System.out.println("Digite o local do evento:");
                             ps.setString(4, in.nextLine());
@@ -75,6 +91,15 @@ public class GerenciadorEventos {
                             rs.next();
                             id_evento = rs.getInt("id_evento");
                             System.out.println("Evento cadastrado com ID: " + id_evento +"\n");
+                        } catch (SQLException e) {
+                            String msg = e.getMessage().toLowerCase();
+                            if (msg.contains("foreign key constraint") || msg.contains("violates foreign key")) {
+                                System.out.println("\nO ID de usuário informado não existe.");
+                                System.out.println("Verifique o ID e tente novamente.\n");
+                            } else {
+                                System.out.println("\nOcorreu um erro ao cadastrar o evento:");
+                                System.out.println(e.getMessage());
+                            }
                         }
                     break;
                 case 3: String inserirParticipante = "INSERT INTO participante (nome, email, telefone, data_cadastro) VALUES (?,?,?,?) RETURNING id_participante";
@@ -93,8 +118,16 @@ public class GerenciadorEventos {
                             rs.next();
                             id_participante = rs.getInt("id_participante");
                             System.out.println("Participante cadastrado com ID: " + id_participante +"\n");
+                        } catch (IllegalArgumentException e) {
+                            System.out.println("Erro: Formato de data/hora inválido. (yyyy-MM-dd HH:mm:ss)");
+                        } catch (SQLException e) {
+                            if (e.getMessage().contains("duplicate key value")) {
+                                System.out.println("\nO email informado já está cadastrado no sistema, tente utilizar outro email.\n");
+                            } else {
+                                System.out.println("Erro ao cadastrar participante: " + e.getMessage() + "\n");
+                            }
                         }
-                    break;
+                        break;
                 case 4: String inserirInscricao = "INSERT INTO inscricao (id_participante, id_evento, data_inscricao) VALUES (?,?,?) RETURNING id_inscricao";
                         int id_inscricao;
                         try (PreparedStatement ps = conexao.prepareStatement(inserirInscricao)) {
@@ -103,24 +136,29 @@ public class GerenciadorEventos {
                             System.out.println("Digite o id do evento:");
                             ps.setInt(2, in.nextInt());
                             in.nextLine();
-                            System.out.println("Informe a data e hora da inscrição:");
+                            System.out.println("Informe a data e hora da inscrição (formato: yyyy-MM-dd HH:mm:ss):");
                             String dataHora = in.nextLine();
                             ps.setTimestamp(3, java.sql.Timestamp.valueOf(dataHora));
                             ResultSet rs = ps.executeQuery();
                             rs.next();
                             id_inscricao = rs.getInt("id_inscricao");
                             System.out.println("Inscrição realizada com ID: " + id_inscricao + "\n");
+                        } catch (IllegalArgumentException e) {
+                            System.out.println("Erro: Formato de data/hora inválido. (yyyy-MM-dd HH:mm:ss)");
+                        } catch (SQLException e) {
+                            System.out.println("Erro ao realizar inscrição: " + e.getMessage() + "\n");
                         }
-                    break;
-                default: System.out.println("Digite uma opção valida!");
+                        break;                    
+                default: System.out.println("Digite uma opção valida!\n");
                     break;
             } 
         } while (true);        
-            
+                
         } catch (SQLException e) {
-            System.err.println("Erro. Confira os dados de conexão ou a instrução SQL.");
+            System.out.println("Erro de conexao!");
             System.err.println(e.getMessage());
         }
+        in.close();
     }
 
 }
