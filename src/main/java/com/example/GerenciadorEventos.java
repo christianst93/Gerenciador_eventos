@@ -10,7 +10,7 @@ import java.util.Scanner;
 public class GerenciadorEventos {
     public static void main(String[] args) {
        
-        String host = "172.17.20.122"; 
+        String host = "localhost"; 
         String porta = "5432";
         String nomeBanco = "gerenciador_eventos";
         String usuario = "postgres";
@@ -122,4 +122,5 @@ public class GerenciadorEventos {
             System.err.println(e.getMessage());
         }
     }
+
 }
