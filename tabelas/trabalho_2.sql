@@ -1,3 +1,7 @@
+CREATE DATABASE gerenciador_eventos;
+
+\c gerenciador_eventos
+
 CREATE TABLE usuario (
     id_usuario SERIAL PRIMARY KEY,
     nome VARCHAR(100) NOT NULL,
@@ -31,4 +35,3 @@ CREATE TABLE inscricao (
     data_inscricao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     UNIQUE (id_participante, id_evento)
 );
-
