@@ -49,7 +49,8 @@ public class GerenciadorEventos {
                             ResultSet rs = ps.executeQuery();
                             rs.next();
                             id_usuario = rs.getInt("id_usuario");
-                            System.out.println("Usuário cadastrado com ID: " + id_usuario + "\n");                            
+                            System.out.println("Usuário cadastrado com ID: " + id_usuario + "\n");
+                                                        
                         } catch (SQLException e){
                             if (e.getMessage().contains("duplicate key value")) {
                                 System.out.println("\nO email informado já está cadastrado no sistema, tente utilizar outro email.\n");
@@ -59,16 +60,18 @@ public class GerenciadorEventos {
                             }
                         }               
                     break;
-                case 2: String inserirEvento = "INSERT INTO evento (titulo, descricao, data_evento, local, id_usuario, criado_em) VALUES (?,?,?,?,?,?) RETURNING id_evento";
+                case 2: String inserirEvento = "INSERT INTO evento (titulo, descricao, data_evento, local, id_usuario, criado_em) VALUES (?,?,?,?,?,now()) RETURNING id_evento";
                         int id_evento;
                         try (PreparedStatement ps = conexao.prepareStatement(inserirEvento)){
+
                             System.out.println("Digite o nome do evento:");
                             ps.setString(1, in.nextLine());
+
                             System.out.println("Digite a descrição:");
                             ps.setString(2, in.nextLine());
-                            System.out.println("Digite a data do evento:");
-                            String data = in.nextLine();
                             
+                            System.out.println("Digite a data do evento:");
+                            String data = in.nextLine();                            
                             java.sql.Date dataEvento;
                             try {
                                 dataEvento = java.sql.Date.valueOf(data);
@@ -77,20 +80,20 @@ public class GerenciadorEventos {
                                 System.out.println("Use o formato correto: (yyyy-mm-dd)\n");
                                 break;                            
                             }
-
                             ps.setDate(3, dataEvento);
+
                             System.out.println("Digite o local do evento:");
                             ps.setString(4, in.nextLine());
+                            
                             System.out.println("Digite o id do usuario:");
                             ps.setInt(5, in.nextInt());
                             in.nextLine();
-                            System.out.println("Informe a data e hora da criação do evento:");
-                            String dataHora = in.nextLine();
-                            ps.setTimestamp(6, java.sql.Timestamp.valueOf(dataHora));
+
                             ResultSet rs = ps.executeQuery();
                             rs.next();
                             id_evento = rs.getInt("id_evento");
                             System.out.println("Evento cadastrado com ID: " + id_evento +"\n");
+
                         } catch (SQLException e) {
                             String msg = e.getMessage().toLowerCase();
                             if (msg.contains("foreign key constraint") || msg.contains("violates foreign key")) {
@@ -102,25 +105,25 @@ public class GerenciadorEventos {
                             }
                         }
                     break;
-                case 3: String inserirParticipante = "INSERT INTO participante (nome, email, telefone, data_cadastro) VALUES (?,?,?,?) RETURNING id_participante";
+                case 3: String inserirParticipante = "INSERT INTO participante (nome, email, telefone, data_cadastro) VALUES (?,?,?,now()) RETURNING id_participante";
                         int id_participante;
                         try (PreparedStatement ps = conexao.prepareStatement(inserirParticipante)) {
+
                             System.out.println("Digite o nome do participante:");
                             ps.setString(1, in.nextLine());
+
                             System.out.println("Digite o email do participante:");
                             ps.setString(2, in.nextLine());
+
                             System.out.println("Digite o telefone do participante:");
                             ps.setString(3, in.nextLine());
-                            System.out.println("Informe a data e hora do cadastro:");
-                            String dataHora = in.nextLine();
-                            ps.setTimestamp(4, java.sql.Timestamp.valueOf(dataHora));
+                            
                             ResultSet rs = ps.executeQuery();
                             rs.next();
                             id_participante = rs.getInt("id_participante");
                             System.out.println("Participante cadastrado com ID: " + id_participante +"\n");
-                        } catch (IllegalArgumentException e) {
-                            System.out.println("Erro: Formato de data/hora inválido. (yyyy-MM-dd HH:mm:ss)");
-                        } catch (SQLException e) {
+                        } 
+                         catch (SQLException e) {
                             if (e.getMessage().contains("duplicate key value")) {
                                 System.out.println("\nO email informado já está cadastrado no sistema, tente utilizar outro email.\n");
                             } else {
@@ -128,23 +131,21 @@ public class GerenciadorEventos {
                             }
                         }
                         break;
-                case 4: String inserirInscricao = "INSERT INTO inscricao (id_participante, id_evento, data_inscricao) VALUES (?,?,?) RETURNING id_inscricao";
+                case 4: String inserirInscricao = "INSERT INTO inscricao (id_participante, id_evento, data_inscricao) VALUES (?,?,now()) RETURNING id_inscricao";
                         int id_inscricao;
                         try (PreparedStatement ps = conexao.prepareStatement(inserirInscricao)) {
                             System.out.println("Digite o id do participante:");
                             ps.setInt(1, in.nextInt());
+
                             System.out.println("Digite o id do evento:");
                             ps.setInt(2, in.nextInt());
-                            in.nextLine();
-                            System.out.println("Informe a data e hora da inscrição (formato: yyyy-MM-dd HH:mm:ss):");
-                            String dataHora = in.nextLine();
-                            ps.setTimestamp(3, java.sql.Timestamp.valueOf(dataHora));
+                            in.nextLine();                            
+                            
                             ResultSet rs = ps.executeQuery();
                             rs.next();
                             id_inscricao = rs.getInt("id_inscricao");
                             System.out.println("Inscrição realizada com ID: " + id_inscricao + "\n");
-                        } catch (IllegalArgumentException e) {
-                            System.out.println("Erro: Formato de data/hora inválido. (yyyy-MM-dd HH:mm:ss)");
+
                         } catch (SQLException e) {
                             System.out.println("Erro ao realizar inscrição: " + e.getMessage() + "\n");
                         }
