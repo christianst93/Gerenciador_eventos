@@ -78,7 +78,7 @@ public class GerenciadorEventos {
                                 break;                            
                             }
 
-                            ps.setDate(3, java.sql.Date.valueOf(data));
+                            ps.setDate(3, dataEvento);
                             System.out.println("Digite o local do evento:");
                             ps.setString(4, in.nextLine());
                             System.out.println("Digite o id do usuario:");
